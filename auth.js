@@ -47,7 +47,7 @@ registerButton.addEventListener('click', () => {
     //     alert('Invalid email format');
     //     return;
     // }
-    createUserWithEmailAndPassword1(auth, email, password)
+    createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
             set(ref(database, 'users/' + user.uid), {
