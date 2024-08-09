@@ -1,14 +1,8 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
-import { getAuth, createUserWithEmailAndPassword,
-    signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getDatabase, set, ref, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAkkPS0QmGmELML1pPGOqeMYsw9ikKZdYY",
   authDomain: "profileprep-67739.firebaseapp.com",
@@ -22,131 +16,113 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const auth = getAuth();
-const database = getDatabase(app);
-
-
-
-
-
-
-
-let email = document.getElementById('Email').value;
-let password = document.getElementById('Password').value;
-let firstname = document.getElementById('Username').value;
-
-
-
+const auth = getAuth(app);
 
 // SignUp
-let registerButton = document.getElementById('registerSubmitBtn');
+const registerButton = document.getElementById('registerSubmitBtn');
 registerButton.addEventListener('click', () => {
-    let email = document.getElementById('Email').value;
-    let password = document.getElementById('Password').value;
-    let firstname = document.getElementById('Username').value;
-    // if (!validateEmail(email)) {
-    //     alert('Invalid email format');
-    //     return;
-    // }
+    const email = document.getElementById('Email').value;
+    const password = document.getElementById('Password').value;
+    const firstname = document.getElementById('Username').value;
+
+    if (!validateEmail(email)) {
+        alert('Invalid email format');
+        return;
+    }
+
     createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            set(ref(database, 'users/' + user.uid), {
-                username: firstname,
-                email: email,
-                password: password,
-            })
-                .then(() => {
-                    alert('User created successfully!');
-                    showlogin();
-                })
-                .catch((error) => {
-                    alert('error');
-                });
+            // User is created, but we're not storing additional information in the database
+            alert('User created successfully!');
+            showlogin(); // Ensure this function is defined
         })
         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error(errorCode, errorMessage);
-            alert(`Error: ${errorMessage}`);
+            console.error('SignUp Error:', error);
+            alert(`Error: ${error.message}`);
         });
 });
 
-
-
-
-
-
 // Login
-let loginButton = document.getElementById('loginSubmitBtn');
+const loginButton = document.getElementById('loginSubmitBtn');
 loginButton.addEventListener('click', () => {
-    let email = document.getElementById('Emaillogin').value;
-    let password = document.getElementById('Passwordlogin').value;
-    // if (!validateEmail(email)) {
-    //     alert('Invalid email format');
-    //     return;
-    // }
+    const email = document.getElementById('Emaillogin').value;
+    const password = document.getElementById('Passwordlogin').value;
+
+    if (!validateEmail(email)) {
+        alert('Invalid email format');
+        return;
+    }
+
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            
-              // Optionally, handle success (e.g., redirect to dashboard)
-              window.location.href = 'Ticket.html'; // Redirect to dashboard after login
-          })
-            // update(ref(database, 'users/' + user.uid), {
-            //     last_login: Date.now()
-            // })
-            //     .then(() => {
-            //         alert('User Logged in successfully!');
-            //         localStorage.setItem('isLoggedIn', 'true'); // Set login state
-            //         window.location.href = 'Ticket.html'; // Redirect to ticket page
-            //     })
-            //     .catch((error) => {
-            //         alert('error');
-            //     });
-        
+            window.location.href = 'Courses.html'; // Redirect after successful login
+        })
         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error(errorCode, errorMessage);
-            alert(`Error: ${errorMessage}`);
+            console.error('Login Error:', error);
+            alert(`Error: ${error.message}`);
         });
 });
 
-
-
-
-//Logout
-let logout = document.getElementById('logoutBtn');
-logout.addEventListener('click', ()=>{
-
-  signOut(auth).then(() => {
-    // Sign-out successful.
-    alert('logout successfully!');
-  }).catch((error) => {
-    // An error happened.
-  });
+// Logout
+const logoutButton = document.getElementById('logoutBtn');
+logoutButton.addEventListener('click', () => {
+    signOut(auth).then(() => {
+        alert('Logged out successfully!');
+        window.location.href = 'login.html'; // Redirect after logout
+    }).catch((error) => {
+        console.error('Logout Error:', error);
+        alert('Logout failed, please try again.');
+    });
 });
 
+// Forgot password
+const forgotPasswordButton = document.getElementById('Forgotpassword');
+forgotPasswordButton.addEventListener('click', () => {
+    const email = document.getElementById('Emaillogin').value;
 
-// Forgot password link event listener
-let forgotpassword = document.getElementById('Forgotpassword');
-forgotpassword.addEventListener('click', () => {
-    let email = document.getElementById('Emaillogin').value;
+    if (!validateEmail(email)) {
+        alert('Invalid email format');
+        return;
+    }
 
     sendPasswordResetEmail(auth, email)
         .then(() => {
-            // Password reset email sent!
+            alert('Password reset email sent!');
         })
         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
+            console.error('Password Reset Error:', error);
+            alert('Failed to send password reset email, please try again.');
         });
 });
 
-
-//Valid email
+// Valid email
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
 }
+
+// Ensure this function is defined
+var a = document.getElementById("loginBtn");
+    var b = document.getElementById("registerBtn");
+    var x = document.getElementById("login");
+    var y = document.getElementById("register");
+
+    function showlogin() {
+        x.style.left = "4px";
+        y.style.right = "-520px";
+        a.className += " white-btn";
+        b.className = "btn";
+        x.style.opacity = 1;
+        y.style.opacity = 0;
+    }
+
+    function showregister() {
+        x.style.left = "-510px";
+        y.style.right = "5px";
+        a.className = "btn";
+        b.className += " white-btn";
+        x.style.opacity = 0;
+        y.style.opacity = 1;
+    }
